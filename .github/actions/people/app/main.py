@@ -11,6 +11,7 @@ import yaml
 from github import Github
 from pydantic import BaseModel, SecretStr
 from pydantic_settings import BaseSettings
+from security import safe_command
 
 github_graphql_url = "https://api.github.com/graphql"
 questions_category_id = "MDE4OkRpc2N1c3Npb25DYXRlZ29yeTMyMDAxNDM0"
@@ -705,22 +706,20 @@ if __name__ == "__main__":
     people_path.write_text(new_people_content, encoding="utf-8")
     github_sponsors_path.write_text(new_github_sponsors_content, encoding="utf-8")
     logging.info("Setting up GitHub Actions git user")
-    subprocess.run(["git", "config", "user.name", "github-actions"], check=True)
-    subprocess.run(
-        ["git", "config", "user.email", "github-actions@github.com"], check=True
+    safe_command.run(subprocess.run, ["git", "config", "user.name", "github-actions"], check=True)
+    safe_command.run(subprocess.run, ["git", "config", "user.email", "github-actions@github.com"], check=True
     )
     branch_name = "fastapi-people"
     logging.info(f"Creating a new branch {branch_name}")
-    subprocess.run(["git", "checkout", "-b", branch_name], check=True)
+    safe_command.run(subprocess.run, ["git", "checkout", "-b", branch_name], check=True)
     logging.info("Adding updated file")
-    subprocess.run(
-        ["git", "add", str(people_path), str(github_sponsors_path)], check=True
+    safe_command.run(subprocess.run, ["git", "add", str(people_path), str(github_sponsors_path)], check=True
     )
     logging.info("Committing updated file")
     message = "👥 Update FastAPI People"
-    result = subprocess.run(["git", "commit", "-m", message], check=True)
+    result = safe_command.run(subprocess.run, ["git", "commit", "-m", message], check=True)
     logging.info("Pushing branch")
-    subprocess.run(["git", "push", "origin", branch_name], check=True)
+    safe_command.run(subprocess.run, ["git", "push", "origin", branch_name], check=True)
     logging.info("Creating PR")
     pr = repo.create_pull(title=message, body=message, base="master", head=branch_name)
     logging.info(f"Created PR: {pr.number}")

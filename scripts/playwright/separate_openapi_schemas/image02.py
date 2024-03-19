@@ -1,6 +1,7 @@
 import subprocess
 
 from playwright.sync_api import Playwright, sync_playwright
+from security import safe_command
 
 
 def run(playwright: Playwright) -> None:
@@ -20,8 +21,7 @@ def run(playwright: Playwright) -> None:
     browser.close()
 
 
-process = subprocess.Popen(
-    ["uvicorn", "docs_src.separate_openapi_schemas.tutorial001:app"]
+process = safe_command.run(subprocess.Popen, ["uvicorn", "docs_src.separate_openapi_schemas.tutorial001:app"]
 )
 try:
     with sync_playwright() as playwright:

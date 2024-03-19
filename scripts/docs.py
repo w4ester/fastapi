@@ -18,6 +18,7 @@ import mkdocs.utils
 import typer
 import yaml
 from jinja2 import Template
+from security import safe_command
 
 logging.basicConfig(level=logging.INFO)
 
@@ -127,7 +128,7 @@ def build_lang(
     current_dir = os.getcwd()
     os.chdir(lang_path)
     shutil.rmtree(build_site_dist_path, ignore_errors=True)
-    subprocess.run(["mkdocs", "build", "--site-dir", build_site_dist_path], check=True)
+    safe_command.run(subprocess.run, ["mkdocs", "build", "--site-dir", build_site_dist_path], check=True)
     shutil.copytree(build_site_dist_path, dist_path, dirs_exist_ok=True)
     os.chdir(current_dir)
     typer.secho(f"Successfully built docs for: {lang}", color=typer.colors.GREEN)
